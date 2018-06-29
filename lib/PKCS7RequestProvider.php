@@ -21,7 +21,7 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
 
     public function processRequest($handler)
     {
-        if (($request = $this->verifyData(file_get_contents("php://input" ))) == null) {
+        if (($request = $this->verifyData(file_get_contents("php://input"))) == null) {
             /**
              * @var IXMLTransformable $params
              */
@@ -51,17 +51,19 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
             CURLOPT_VERBOSE        => 0,
             CURLOPT_POSTFIELDS     => $this->signData($params->toXml())
         );
+
         curl_setopt_array($curl, $params);
 
         $result = null;
         try {
             $result = curl_exec($curl);
+            dd($result);
             if (!$result) {
                 trigger_error(curl_error($curl));
             }
             curl_close($curl);
-        } catch (\HttpException $ex) {
-            echo $ex;
+        } catch (\HttpException $exception) {
+            echo $exception;
         }
 
         return $this->verifyData($result);

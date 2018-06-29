@@ -1,5 +1,6 @@
 {
     "name": "agoalofalife/yandex-mone-payout",
+    "keywords": ["yandex", "yandex-kassa", "yandex-money", "yandex-payout"],
     "description": "Module for integration with YandexMoney Payouts. See https://tech.yandex.ru/money/doc/payment-solution/payout/",
     "minimum-stability": "dev",
     "license": "MIT",
@@ -7,6 +8,10 @@
         {
             "name": "Shnell Pavel",
             "email": "shnellpavel@gmail.com"
+        },
+        {
+            "name": "Ilya Chubarov",
+            "email": "agoalofalife@gmail.com"
         }
     ],
     "require-dev": {
