@@ -57,7 +57,7 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
         $result = null;
         try {
             $result = curl_exec($curl);
-            dd($result);
+
             if (!$result) {
                 trigger_error(curl_error($curl));
             }
