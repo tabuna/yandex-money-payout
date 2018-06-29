@@ -7,7 +7,6 @@
 
 namespace YandexMoney;
 
-
 use YandexMoney\interfaces\IDispositionRequestProvider;
 use YandexMoney\interfaces\IXMLTransformable;
 
@@ -15,27 +14,26 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
 {
     private $settings;
 
-    public function __construct( Settings $settings )
+    public function __construct(Settings $settings)
     {
         $this->settings = $settings;
     }
 
-    public function processRequest( $handler )
+    public function processRequest($handler)
     {
-        if ( ( $request = $this->verifyData( file_get_contents( "php://input" ) ) ) == null )
-        {
+        if (($request = $this->verifyData(file_get_contents("php://input" ))) == null) {
             /**
              * @var IXMLTransformable $params
              */
             $params = call_user_func($handler, $request);
-            header( "HTTP/1.0 200" );
-            header( "Content-Type: application/pkcs7-mime" );
-            echo $this->signData( $params->toXml() );
+            header("HTTP/1.0 200");
+            header("Content-Type: application/pkcs7-mime");
+            echo $this->signData($params->toXml());
             exit;
         }
     }
 
-    public function sendRequest( $dispositionMethod, IXMLTransformable $params )
+    public function sendRequest($dispositionMethod, IXMLTransformable $params)
     {
         $curl   = curl_init();
         $params = array(
@@ -50,62 +48,57 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
             CURLOPT_SSLCERTPASSWD  => $this->settings->certPassword,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_VERBOSE        => 0,
-            CURLOPT_POSTFIELDS     => $this->signData( $params->toXml() )
+            CURLOPT_POSTFIELDS     => $this->signData($params->toXml())
         );
-        curl_setopt_array( $curl, $params );
+        curl_setopt_array($curl, $params);
 
         $result = null;
-        try
-        {
-            $result = curl_exec( $curl );
-            if ( !$result )
-            {
-                trigger_error( curl_error( $curl ) );
+        try {
+            $result = curl_exec($curl);
+            if (!$result) {
+                trigger_error(curl_error($curl));
             }
-            curl_close( $curl );
-        } catch ( \HttpException $ex )
-        {
+            curl_close($curl);
+        } catch (\HttpException $ex) {
             echo $ex;
         }
 
-        return $this->verifyData( $result );
+        return $this->verifyData($result);
     }
 
-    private function signData( $data )
+    private function signData($data)
     {
         $descriptorSpec      = array(
             0 => array( "pipe", "r" ),
             1 => array( "pipe", "w" ),
         );
         $descriptorSpec[ 2 ] = $descriptorSpec[ 1 ];
-        try
-        {
+        try {
             $opensslCommand = 'openssl smime -sign -signer ' . $this->settings->cert .
                 ' -inkey ' . $this->settings->privateKey .
                 ' -nochain -nocerts -outform PEM -nodetach -passin pass:' . $this->settings->certPassword;
 
-            $process = proc_open( $opensslCommand, $descriptorSpec, $pipes );
-            if ( is_resource( $process ) )
-            {
-                fwrite( $pipes[ 0 ], $data );
-                fclose( $pipes[ 0 ] );
-                $signedData = stream_get_contents( $pipes[ 1 ] );
-                fclose( $pipes[ 1 ] );
-                $resCode = proc_close( $process );
-                if ( $resCode != 0 )
-                {
+            $process = proc_open($opensslCommand, $descriptorSpec, $pipes);
+
+            if (is_resource($process)) {
+                fwrite($pipes[0], $data);
+                fclose($pipes[0]);
+                $signedData = stream_get_contents($pipes[1]);
+                fclose($pipes[1]);
+                $resCode = proc_close($process);
+
+                if ($resCode != 0) {
                     $errorMsg = 'OpenSSL call failed:' . $resCode . '\n' . $signedData;
-                    throw new \Exception( $errorMsg );
+                    throw new \Exception($errorMsg);
                 }
                 return $signedData;
             }
-        } catch ( \Exception $e )
-        {
+        } catch (\Exception $e) {
             throw $e;
         }
     }
 
-    private function verifyData( $data )
+    private function verifyData($data)
     {
         $descriptorSpec = array(
             0 => array( "pipe", "r" ),
@@ -116,9 +109,9 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
             ' -certfile ' . $this->settings->yaCert .
             ' -CAfile ' . $this->settings->yaCert;
 
-        $process = proc_open( $verifyCommand, $descriptorSpec, $pipes );
-        if ( is_resource( $process ) )
-        {
+        $process = proc_open($verifyCommand, $descriptorSpec, $pipes);
+
+        if (is_resource($process)) {
             fwrite( $pipes[ 0 ], $data );
             fclose( $pipes[ 0 ] );
             $content = stream_get_contents( $pipes[ 1 ] );
