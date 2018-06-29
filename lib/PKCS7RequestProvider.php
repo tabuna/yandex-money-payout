@@ -38,8 +38,9 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
         $curl   = curl_init();
         $params = array(
             CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_HTTPHEADER     => array( 'Content-type: application/pkcs7-mime' ),
-            CURLOPT_URL            => rtrim( $this->settings->host, '/' ) . '/webservice/deposition/api/' . trim( $dispositionMethod, '/' ),
+            CURLOPT_HTTPHEADER     => array('Content-type: application/pkcs7-mime'),
+            CURLOPT_URL            => rtrim($this->settings->host, '/') .
+                '/webservice/deposition/api/' . trim($dispositionMethod, '/'),
             CURLOPT_POST           => true,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_CONNECTTIMEOUT => 30,
@@ -86,7 +87,7 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
                 $signedData = stream_get_contents($pipes[1]);
                 fclose($pipes[1]);
                 $resCode = proc_close($process);
-
+                
                 if ($resCode != 0) {
                     $errorMsg = 'OpenSSL call failed:' . $resCode . '\n' . $signedData;
                     throw new \Exception($errorMsg);
@@ -112,20 +113,17 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
         $process = proc_open($verifyCommand, $descriptorSpec, $pipes);
 
         if (is_resource($process)) {
-            fwrite( $pipes[ 0 ], $data );
-            fclose( $pipes[ 0 ] );
-            $content = stream_get_contents( $pipes[ 1 ] );
-            fclose( $pipes[ 1 ] );
-            $resCode = proc_close( $process );
+            fwrite($pipes[0], $data);
+            fclose($pipes[0]);
+            $content = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+            $resCode = proc_close($process);
 
-            if ( $resCode != 0 )
-            {
+            if ($resCode != 0) {
                 return null;
-            }
-            else
-            {
-                $xml   = simplexml_load_string( $content );
-                $array = json_decode( json_encode( $xml ), true );
+            } else {
+                $xml   = simplexml_load_string($content);
+                $array = json_decode(json_encode($xml), true);
                 return $array[ "@attributes" ];
             }
         }

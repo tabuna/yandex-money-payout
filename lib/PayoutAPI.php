@@ -7,7 +7,6 @@
 
 namespace YandexMoney;
 
-
 use YandexMoney\interfaces\IDispositionRequestProvider;
 use YandexMoney\interfaces\IPayoutAPI;
 
@@ -55,7 +54,7 @@ class PayoutAPI implements IPayoutAPI
         $this->synonimUrl      = $synonimUrl;
     }
 
-    public function getCardSynonim( $cardNum )
+    public function getCardSynonim($cardNum)
     {
         $curl   = curl_init();
         $params = array(
@@ -71,49 +70,46 @@ class PayoutAPI implements IPayoutAPI
                 'skr_responseFormat'        => 'json',
             ))
         );
-        curl_setopt_array( $curl, $params );
+        curl_setopt_array($curl, $params);
 
         $result = null;
-        try
-        {
-            $result = curl_exec( $curl );
-            if ( !$result )
-            {
-                trigger_error( curl_error( $curl ) );
+        try {
+            $result = curl_exec($curl);
+            if (!$result) {
+                trigger_error(curl_error($curl));
             }
-            curl_close( $curl );
+            curl_close($curl);
 
-            $result = (array)json_decode( $result );
-            $result = (array)$result[ 'storeCard' ];
-        } catch ( \HttpException $ex )
-        {
+            $result = (array)json_decode($result);
+            $result = (array)$result['storeCard'];
+        } catch (\HttpException $ex) {
             echo $ex;
         }
 
         return $result;
     }
 
-    public function makeDeposition( DepositionRequestParams $params )
+    public function makeDeposition(DepositionRequestParams $params)
     {
-        return $this->requestProvider->sendRequest( 'makeDeposition', $params );
+        return $this->requestProvider->sendRequest('makeDeposition', $params);
     }
 
-    public function testDeposition( DepositionRequestParams $params )
+    public function testDeposition(DepositionRequestParams $params)
     {
-        return $this->requestProvider->sendRequest( 'testDeposition', $params );
+        return $this->requestProvider->sendRequest('testDeposition', $params);
     }
 
-    public function getBalance( BalanceRequestParams $params )
+    public function getBalance(BalanceRequestParams $params)
     {
-        return $this->requestProvider->sendRequest( 'balance', $params );
+        return $this->requestProvider->sendRequest('balance', $params);
     }
 
-    public function errorDepositionNotification( $handler )
+    public function errorDepositionNotification($handler)
     {
-        return $this->requestProvider->processRequest( $handler );
+        return $this->requestProvider->processRequest($handler);
     }
 
-    public static function translateError( $code )
+    public static function translateError($code)
     {
         $translations = array(
             self::ERROR_SYNTAX                     => 'Ошибка синтаксического разбора XML-документа. Синтаксис документа нарушен или отсутствуют обязательные элементы XML.',
@@ -146,6 +142,6 @@ class PayoutAPI implements IPayoutAPI
             self::ERROR_RECEIVER_PAYMENT_REVERT    => 'Получатель перевода вернул платеж (под получателем понимается сотовый оператор или процессинговый банк).',
         );
 
-        return ( ( isset( $translations[ $code ] ) ) ? $translations[ $code ] : $code );
+        return ((isset($translations[$code])) ? $translations[$code] : $code);
     }
 }

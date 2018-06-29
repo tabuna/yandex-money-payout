@@ -7,8 +7,8 @@
 
 namespace YandexMoney\interfaces;
 
-
-interface IDispositionRequestProvider {
+interface IDispositionRequestProvider
+{
     public function sendRequest($dispositionMethod, IXMLTransformable $params);
     public function processRequest($handler);
-} 
+}

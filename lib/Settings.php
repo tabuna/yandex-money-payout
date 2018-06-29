@@ -7,7 +7,8 @@
 
 namespace YandexMoney;
 
-class Settings {
+class Settings
+{
     public $host;
 
     public $privateKey;

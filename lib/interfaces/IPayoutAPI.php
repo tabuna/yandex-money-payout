@@ -7,17 +7,16 @@
 
 namespace YandexMoney\interfaces;
 
-
 use YandexMoney\BalanceRequestParams;
 use YandexMoney\DepositionRequestParams;
 
 interface IPayoutAPI
 {
-    public function makeDeposition( DepositionRequestParams $params );
+    public function makeDeposition(DepositionRequestParams $params);
 
-    public function testDeposition( DepositionRequestParams $params );
+    public function testDeposition(DepositionRequestParams $params);
 
-    public function getBalance( BalanceRequestParams $params );
+    public function getBalance(BalanceRequestParams $params);
 
-    public function errorDepositionNotification( $handler );
-} 
+    public function errorDepositionNotification($handler);
+}
