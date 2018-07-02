@@ -48,7 +48,7 @@ class PayoutAPI implements IPayoutAPI
     private $requestProvider;
     private $synonimUrl;
 
-    public function __construct( IDispositionRequestProvider $requestProvider, $synonimUrl )
+    public function __construct(IDispositionRequestProvider $requestProvider, $synonimUrl)
     {
         $this->requestProvider = $requestProvider;
         $this->synonimUrl      = $synonimUrl;
