@@ -85,3 +85,6 @@ switch (intval($response['status'])) {
         break;
 }
 ```
+
+### Примечания
+Сертификаты `.pem` не работают в Mac OS
