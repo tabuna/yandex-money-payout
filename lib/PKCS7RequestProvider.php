@@ -49,7 +49,7 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
             CURLOPT_SSLCERTPASSWD  => $this->settings->certPassword,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_VERBOSE        => 0,
-            CURLOPT_POSTFIELDS     => $this->signData($params->toXml())
+            CURLOPT_POSTFIELDS     => $this->signData($params->toXml()),
         );
 
         curl_setopt_array($curl, $params);
