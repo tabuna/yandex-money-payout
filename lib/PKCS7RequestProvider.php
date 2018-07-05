@@ -118,6 +118,7 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
             fwrite($pipes[0], $data);
             fclose($pipes[0]);
             $content = stream_get_contents($pipes[1]);
+
             fclose($pipes[1]);
             $resCode = proc_close($process);
 
@@ -126,7 +127,7 @@ class PKCS7RequestProvider implements IDispositionRequestProvider
             } else {
                 $xml   = simplexml_load_string($content);
                 $array = json_decode(json_encode($xml), true);
-                return $array[ "@attributes" ];
+                return $array["@attributes"];
             }
         }
         return null;
