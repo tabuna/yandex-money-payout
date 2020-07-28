@@ -100,13 +100,6 @@ switch (intval($response['status'])) {
 `private.key` также переименовывается в pem и присваеватеся в privateKey
 
 
-Ключ который отсылали в Яндекс.
-request.csr переименовывается в request.cer и присваевается в поле yaCert
-Меняются header и  footer документа на 
-
-`-----BEGIN CERTIFICATE REQUEST-----   ->  ------BEGIN CERTIFICATE-----`
-`-----END CERTIFICATE REQUEST----- ->  -----END CERTIFICATE-----`
-
 
 ### Примечания
 Взаимодействия между серверами, происходит через curl.
