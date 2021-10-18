@@ -1,6 +1,6 @@
 {
     "name": "agoalofalife/yandex-mone-payout",
-    "keywords": ["yandex", "yandex-kassa", "yandex-money", "yandex-payout"],
+    "keywords": ["yandex", "yandex-kassa", "yandex-money", "yandex-payout", "ymoney"],
     "description": "Module for integration with YandexMoney Payouts. See https://tech.yandex.ru/money/doc/payment-solution/payout/",
     "minimum-stability": "dev",
     "license": "MIT",
