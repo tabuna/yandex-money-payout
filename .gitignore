@@ -4,3 +4,4 @@
 composer.lock
 index.php
 vendor/
+.phpunit.result.cache
