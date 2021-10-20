@@ -38,8 +38,6 @@ abstract class YandexPayout extends ResponseAssertions implements Reportable
      */
     protected $generator;
 
-//    private $customError = '';
-
     public function __construct(
         Settings $settings,
         GeneratorClientOrderId $generator
@@ -94,13 +92,4 @@ abstract class YandexPayout extends ResponseAssertions implements Reportable
      * @return mixed
      */
     abstract protected function makeRequest(string $typeRequest);
-//    public function getError(): string
-//    {
-//        return empty($this->customError) ? PayoutAPI::translateError($this->response['error']) : $this->customError;
-//    }
-//
-//    public function setCustomError(string $error)
-//    {
-//        $this->customError = $error;
-//    }
 }
