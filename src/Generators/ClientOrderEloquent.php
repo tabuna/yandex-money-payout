@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace YandexPayout\Generators;
 
-use App\Models\Reward\MoneyReward\Drivers\YandexPayout;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use YandexPayout\Contracts\GeneratorClientOrderId;
@@ -39,7 +38,12 @@ class ClientOrderEloquent implements GeneratorClientOrderId
 
     private function incrementId(): int
     {
-        $statement = DB::select("SHOW TABLE STATUS LIKE '{$this->model->getTable()}'");
-        return $statement[0]->Auto_increment;
+        $lastRow = $this->model->newQuery()->orderByDesc('id')->limit(1)->first();
+
+        if (is_null($lastRow)) {
+            return 1;
+        } else {
+            return $lastRow->id + 1;
+        }
     }
 }

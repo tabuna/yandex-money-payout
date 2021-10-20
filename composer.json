@@ -1,5 +1,5 @@
 {
-    "name": "agoalofalife/yandex-mone-payout",
+    "name": "agoalofalife/yandex-money-payout",
     "keywords": [
         "yandex",
         "yandex-kassa",
@@ -22,7 +22,7 @@
     ],
     "require": {
         "php": "^7.3",
-        "ramsey/uuid": "4.x-dev"
+        "ramsey/uuid": "^4.2"
     },
     "require-dev": {
         "phpunit/phpunit": "8.*"
@@ -34,7 +34,8 @@
     },
     "autoload": {
         "psr-4": {
-            "YandexPayout\\": "src/"
+            "YandexPayout\\": "src/",
+            "YandexMoney\\": "lib/"
         }
     }
 }

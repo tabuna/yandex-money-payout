@@ -43,8 +43,10 @@ abstract class YandexPayout extends ResponseAssertions implements Reportable
         GeneratorClientOrderId $generator
     ) {
         $this->settings = $settings;
-        $this->service = new PayoutAPI(new PKCS7RequestProvider($settings),
-            $this->settings->synonimUrl);
+        $this->service = new PayoutAPI(
+            new PKCS7RequestProvider($settings),
+            $this->settings->synonimUrl
+        );
         $this->generator = $generator;
     }
 
