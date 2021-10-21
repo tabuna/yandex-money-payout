@@ -7,6 +7,7 @@
     - [Генерация clientOrderId](#generatorId)
     - [Начисление на телефон](#phone)
     - [Начисление на яндекс кошелек](#yandex-purse)
+    - [Структура ответа](#report)
     - [Интеграция с Laravel](#laravel)
 
 - [Дополнительный материалы](#extra)
@@ -80,20 +81,25 @@ composer require agoalofalife/yandex-money-payout
 ## Настройка сертификатов и данных
 
 ```php
-    $settings = new Settings();
-    $settings->agentId = ''; // Получите у менеджера agentId — идентификатор вашего шлюза в ЮKassa.
-    $settings->cert = '201111.pem'; // абсолютный путь до файла - сертификат который 
-    // присылает яндекс в конце по почте - обычно такое название 201111.cer 
-     // => 201111.pem надо изменить на pem
-    $settings->certPassword = ''; // пароль от сертификата privateKey
-    $settings->privateKey = ''; // абсолютный путь до файла -приватный ключ - 
-//    который создается на 
-//    вашей стороне, вот ссылка как https://yookassa.ru/docs/payouts/api/using-api/security#creating-private-key
-//    private.pem => ожидается в расширении .pem
-    $settings->yaCert = ''; // абсолютный путь до файла - сертификакт который 
-//    отправляется в яндекс вместе с заявкой request.cer => нужен в 
-//    расширении .cer
-//    ссылка на него https://yookassa.ru/docs/payouts/api/using-api/security#creating-csr
+  $settings = new Settings();
+  $settings->agentId = '';
+  // Получите у менеджера agentId — идентификатор вашего шлюза в ЮKassa.
+  $settings->cert = '201111.pem';
+  // абсолютный путь до файла - сертификат который
+  // присылает яндекс в конце по почте -
+  // обычно такое название 201111.cer => 201111.pem надо изменить на pem
+  $settings->certPassword = '';
+  // пароль от сертификата privateKey
+  $settings->privateKey = '';
+  // абсолютный путь до файла - приватный ключ - который создается на 
+  // вашей стороне,
+  // вот ссылка как
+  // https://yookassa.ru/docs/payouts/api/using-api/security#creating-private-key
+  // private.pem => ожидается в расширении .pem
+  $settings->yaCert = ''; // абсолютный путь до файла -
+  // сертификакт который отправляется в яндекс вместе с заявкой
+  //request.cer => нужен в расширении .cer ссылка на него
+  // https://yookassa.ru/docs/payouts/api/using-api/security#creating-csr
 ```
 
 <a name="generatorId"></a>
@@ -104,7 +110,7 @@ composer require agoalofalife/yandex-money-payout
 
 ℹ️ UUID
 
-    `YandexPayout\Generators\ClientOrderUuid`
+`YandexPayout\Generators\ClientOrderUuid`
 
     Генерация clientOrderId через uuid version 4,
     случайным образом генерируется уникальный id
@@ -128,14 +134,14 @@ composer require agoalofalife/yandex-money-payout
 
 Вы можете реализовать свой способ через интерфейс
 
-**YandexPayout\Contracts\GeneratorClientOrderId**
+`YandexPayout\Contracts\GeneratorClientOrderId`
 
     - public function getId(): string;
        Получение текущего id, например для id из базы - это следующий номер 
        после крайнего.  
       
     - public function generateNextId(): string;
-    Реализация следуеющего номера - это может быть просто порядковый номер 
+      Реализация следуеющего номера - это может быть просто порядковый номер 
       или как в случае uuid уникальный - зависит от вас. Метод нужен - если 
       под текущим id - уже есть запись в яндекс и надо повторить запрос с 
       новым clientOrderId
@@ -175,25 +181,6 @@ composer require agoalofalife/yandex-money-payout
         $phone->getReport(); // получение отчета о запросе - где данные об 
 //        ответе сервиса и данные из запроса, для получения данных - 
 //        предоставлены get методы
-//        Примерная структура такая
-        YandexPayout\ReportOfRequest {#1637 ▼
-          -clientOrderId: "1"
-          -amount: 1.0
-          -dstAccount: "79052075556"
-          -contract: "Тестовый платеж"
-          -agentId: "201111"
-          -currency: 643
-          -response: YandexPayout\Response\Response {#1652 ▼ // Объект 
-//          response можно получить через метод $phone->getReport()->response()
-            -balance: "200.36"
-            -processedDT: "2021-10-20T21:29:50.747+03:00"
-            -identification: "reviewed"
-            -techMessage: null
-            -status: "0"
-            -error: null
-          }
-        }
-        
 ```
 
 <a name="yandex-purse"></a>
@@ -231,25 +218,33 @@ composer require agoalofalife/yandex-money-payout
         $phone->getReport(); // получение отчета о запросе - где данные об 
 //        ответе сервиса и данные из запроса, для получения данных - 
 //        предоставлены get методы
-//        Примерная структура такая
-        YandexPayout\ReportOfRequest {#1637 ▼
-          -clientOrderId: "1"
-          -amount: 1.0
-          -dstAccount: "4100116075156746"
-          -contract: "Тестовый платеж"
-          -agentId: "201111"
-          -currency: 643
-          -response: YandexPayout\Response\Response {#1652 ▼ // Объект 
-//          response можно получить через метод $phone->getReport()->response()
-            -balance: "200.36"
-            -processedDT: "2021-10-20T21:29:50.747+03:00"
-            -identification: "reviewed"
-            -techMessage: null
-            -status: "0"
-            -error: null
-          }
-        }
-        
+```
+
+<a name="report"></a>
+
+## Структура ответа
+
+Структура ответа `$phone->getReport()`
+
+```php
+    // Примерная структура такая
+    YandexPayout\ReportOfRequest {#1637 ▼
+      -clientOrderId: "1"
+      -amount: 1.0
+      -dstAccount: "79052075556"
+      -contract: "Тестовый платеж"
+      -agentId: "201111"
+      -currency: 643
+      -response: YandexPayout\Response\Response {#1652 ▼ // Объект 
+    // response можно получить через метод $phone->getReport()->response()
+        -balance: "200.36"
+        -processedDT: "2021-10-20T21:29:50.747+03:00"
+        -identification: "reviewed"
+        -techMessage: null
+        -status: "0"
+        -error: null
+      }
+    }
 ```
 
 <a name="laravel"></a>
