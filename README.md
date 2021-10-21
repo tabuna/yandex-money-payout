@@ -256,7 +256,7 @@ composer require agoalofalife/yandex-money-payout
 Скопируем файл конфигурации в папку config
 
 ```shell
-php artisan vendor:publish --tag= yandex-payouts`
+php artisan vendor:publish --tag= yandex-payouts
 ```
 
 Далее надо передать все настройки и выбрать генератор по-умолчанию
