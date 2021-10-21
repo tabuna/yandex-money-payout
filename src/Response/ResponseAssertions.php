@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace YandexPayout;
+namespace YandexPayout\Response;
 
 use YandexMoney\PayoutAPI;
 

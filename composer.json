@@ -37,5 +37,12 @@
             "YandexPayout\\": "src/",
             "YandexMoney\\": "lib/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "YandexPayout\\Laravel\\Providers\\YandexPayoutProvider"
+            ]
+        }
     }
 }

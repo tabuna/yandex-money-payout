@@ -26,6 +26,6 @@ class YandexPurse extends YandexPayout implements TestDepositionContract
         $depositionParams->contract = $this->contract;
         $depositionParams->dstAccount = $this->dstAccount;
 
-        $this->response = $this->service->{$typeRequest}($depositionParams);
+        $this->rawResponse = $this->service->{$typeRequest}($depositionParams);
     }
 }

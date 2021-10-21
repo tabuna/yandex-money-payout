@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace YandexPayout\Generators;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use YandexPayout\Contracts\GeneratorClientOrderId;
 
 class ClientOrderEloquent implements GeneratorClientOrderId

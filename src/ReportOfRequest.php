@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YandexPayout;
 
 use YandexPayout\Contracts\Reportable;
+use YandexPayout\Response\Response;
 
 class ReportOfRequest
 {
