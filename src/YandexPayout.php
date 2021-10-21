@@ -10,6 +10,8 @@ use YandexMoney\PKCS7RequestProvider;
 use YandexMoney\Settings;
 use YandexPayout\Contracts\GeneratorClientOrderId;
 use YandexPayout\Contracts\Reportable;
+use YandexPayout\Response\Response;
+use YandexPayout\Response\ResponseAssertions;
 
 abstract class YandexPayout extends ResponseAssertions implements Reportable
 {

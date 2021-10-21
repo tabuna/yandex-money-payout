@@ -1,108 +1,314 @@
-# Библиотека для интеграции с Массовыми выплатами от Яндекс
+<h1 align="center">Библиотека для интеграции с Массовыми выплатами от Яндекс</h1>
+
+- [Описание](#description)
+- [Установка](#Installation)
+- [Как пользоваться?](#howuseit)
+    - [Настройка](#settings)
+    - [Генерация clientOrderId](#generatorId)
+    - [Начисление на телефон](#phone)
+    - [Начисление на яндекс кошелек](#yandex-purse)
+    - [Интеграция с Laravel](#laravel)
+
+- [Дополнительный материалы](#extra)
+- [Угостить чаем 😌](#donate)
+
+<a name="description"></a>
 
 ## Описание
-* О функционале выплат можно прочить сайте [Яндекс.Касса](https://kassa.yandex.ru/payouts)
-* Документация по интеграции может быть найдена на по ссылке выше или [здесь](https://tech.yandex.ru/money/doc/payment-solution/payout/intro-docpage/) 
 
-## Реализация
-* Получение баланса
-* Проверка возможности осуществить перевод
-* Перевод на Яндекс кошелёк
-* Перевод на счёт мобильного телефона
-* Перевод на банковскую карту
+Библиотека предоставляет функционал по начислению денег в яндекс выплаты.
 
-## Пример использования:
-```php
-<?php
+### Существует две версии библиотеки:
 
-$settings               = new \YandexMoney\Settings();
-$settings->host         = $params['yandexPayout']['host'];
-$settings->cert         = $params['yandexPayout']['cert'];
-$settings->certPassword = $params['yandexPayout']['certPassword'];
-$settings->privateKey   = $params['yandexPayout']['privateKey'];
-$settings->yaCert       = $params['yandexPayout']['yaCert'];
-$provider               = new \YandexMoney\PKCS7RequestProvider($settings);
+#### v1 (Старая версия)
 
-$api = new \YandexMoney\PayoutAPI($provider, $params['yandexPayout']['cardSynonimUrl']);
+Виды выплат и возможности
 
-// Обработка перевода
-$depositionParams             = new \YandexMoney\DepositionRequestParams($agentId, $clientOrderId,
-    'makeDeposition');
-$depositionParams->amount     = $amount;
-$depositionParams->dstAccount = $dstAccount;
-$depositionParams->currency   = $currency;
-$depositionParams->contract   = $contract;
+     ✅ PHP 5
 
-if ($depositionType == TYPE_MOBILE) {
-    $paymentParams               = new \YandexMoney\MobilePaymentParams();
-    $paymentParams->operatorCode = $phoneOperatorCode;
-    $paymentParams->phoneNumber  = $phoneNumber;
-    $depositionParams->setPaymentParams($paymentParams);
-} elseif ($depositionType == TYPE_BANK_CARD) {
-    // Получаем синоним и маску
-    $synonimRes = $api->getCardSynonim($cardNumber);
-    if ($synonimRes != null) {
-        $cardSynonim = $synonimRes['skr_destinationCardSynonim'];
-        $cardMask    = $synonimRes['skr_destinationCardPanmask'];
-    }
+     ✅ На телефон
     
-    $paymentParams              = new \YandexMoney\BankCardPaymentParams();
-    $paymentParams->cardSynonim = $cardSynonim;
+     ✅ На яндекс кошелек
+    
+     ✅ На банковскую карту
+     
+     ❌ Интеграция с Laravel
 
-    $paymentParams->lastName   = $payerLastName;
-    $paymentParams->firstName  = $payerFirstName;
-    $paymentParams->middleName = $payerMiddleName;
+     ❌ Автоинкрементирование clientOrderId
 
-    $paymentParams->birthDate  = $payerBirthDate;
-    $paymentParams->birthPlace = $payerBirthPlace;
-    $paymentParams->address    = $payerAddress;
-    $paymentParams->city       = $payerCity;
-    $paymentParams->country    = $payerCountry;
-    $paymentParams->postcode   = $payerPostcode;
+     ❌ Сложный API
 
-    $paymentParams->docNumber      = $payerDocNumber;
-    $paymentParams->docIssueDate   = $payerDocIssueDate;
-    $paymentParams->docIssuedBy    = $payerDocIssuedBy;
-    $paymentParams->smsPhoneNumber = $smsPhoneNumber;
+#### v2 (Новая версия)
 
-    $depositionParams->setPaymentParams($paymentParams);
-} else {
-    // Перевод на Яндекс кошелёк, уточненять параметры перевода не требуется
-}
+Виды выплат и возможности
 
-$response = $api->makeDeposition($depositionParams);
+     ✅ PHP >=7.3
 
-switch (intval($response['status'])) {
-    case \YandexMoney\PayoutAPI::REQ_STATUS_SUCCESS:
-        // ...
-        break;
-    case \YandexMoney\PayoutAPI::REQ_STATUS_IN_PROGRESS:
-        // ...
-        break;
-    case \YandexMoney\PayoutAPI::REQ_STATUS_REJECTED:
-        $error = $response['error'];
-        // ...
-        break;
-}
+     ✅ На телефон
+    
+     ✅ На яндекс кошелек
+    
+     ❌ На банковскую карту
+     
+     ✅ Интеграция с Laravel
+
+     ✅ Автоинкрементирование clientOrderId
+
+     ✅ ClientOrderId через модель Eloquent
+
+     ✅ ClientOrderId в формате UUID
+
+     ✅ Легкий API
+
+<a name="Installation"></a>
+
+## Установка
+
+```shell
+composer require agoalofalife/yandex-money-payout
 ```
-### Путаница с сертификатами
 
-Сертификаты
+<a name="howuseit"></a>
 
-Сертификаты всегда вносят путаницу, даже если вы интегрируете не первый раз. 
-Всего 3 сертификаты для работы с Яндекс платежами.
+## Как пользоваться?
 
-Один сертификат который вам присылает Яндекс. Как правило он имеет какой то номер в названии.
-К примеру 204020.cer. Сначала его надо переименовать в расширение pem.
-Потом присвоить свойству cert в классе настройки.
+Для работы с пакетом вам надо закончить все юридические и технические моменты с
+яндекс и получить сертификаты для взаимодействия с серверами ЮKassa.
 
-Приватный ключ
-`private.key` также переименовывается в pem и присваеватеся в privateKey
+<a name="settings"></a>
 
+## Настройка сертификатов и данных
 
+```php
+    $settings = new Settings();
+    $settings->agentId = ''; // Получите у менеджера agentId — идентификатор вашего шлюза в ЮKassa.
+    $settings->cert = '201111.pem'; // абсолютный путь до файла - сертификат который 
+    // присылает яндекс в конце по почте - обычно такое название 201111.cer 
+     // => 201111.pem надо изменить на pem
+    $settings->certPassword = ''; // пароль от сертификата privateKey
+    $settings->privateKey = ''; // абсолютный путь до файла -приватный ключ - 
+//    который создается на 
+//    вашей стороне, вот ссылка как https://yookassa.ru/docs/payouts/api/using-api/security#creating-private-key
+//    private.pem => ожидается в расширении .pem
+    $settings->yaCert = ''; // абсолютный путь до файла - сертификакт который 
+//    отправляется в яндекс вместе с заявкой request.cer => нужен в 
+//    расширении .cer
+//    ссылка на него https://yookassa.ru/docs/payouts/api/using-api/security#creating-csr
+```
 
-### Примечания
-Взаимодействия между серверами, происходит через curl.
-Сертификаты `cert` и `privateKey` требуются в расширении `.pem`.
-Сертификаты `.pem` не работают в Mac OS.
-Чтобы выйти из ситуации, тестируйте через Docker.
+<a name="generatorId"></a>
+
+## Генерация clientOrderId
+
+Далее необходимо выбрать способ генерации clientOrderId:
+
+ℹ️ UUID
+
+    `YandexPayout\Generators\ClientOrderUuid`
+
+    Генерация clientOrderId через uuid version 4,
+    случайным образом генерируется уникальный id
+
+ ```php
+  $generator = new \YandexPayout\Generators\ClientOrderUuid();
+ ```
+
+ℹ️ Eloquent Id
+
+`YandexPayout\Generators\ClientOrderEloquent`
+
+    Генерация номера по порядковому номеру id в базе данных через eloquent 
+    модель laravel
+
+ ```php
+  $generator = new \YandexPayout\Generators\ClientOrderEloquent(new \App\Models\YandexPayout());
+ ```
+
+ℹ️ Свой вариант
+
+Вы можете реализовать свой способ через интерфейс
+
+**YandexPayout\Contracts\GeneratorClientOrderId**
+
+    - public function getId(): string;
+       Получение текущего id, например для id из базы - это следующий номер 
+       после крайнего.  
+      
+    - public function generateNextId(): string;
+    Реализация следуеющего номера - это может быть просто порядковый номер 
+      или как в случае uuid уникальный - зависит от вас. Метод нужен - если 
+      под текущим id - уже есть запись в яндекс и надо повторить запрос с 
+      новым clientOrderId
+
+<a name="phone"></a>
+
+## Начисление на телефон
+
+✅ Проверка возможности осуществлении
+платежа [(testDeposition)](https://yookassa.ru/docs/payouts/api/make-deposition/basics#test-deposition)
+
+```php
+        // Передаем настройки
+        $settings = new Settings();
+        $settings->agentId = '';
+        $settings->cert = '';
+        $settings->certPassword = '';
+        $settings->privateKey = '';
+        $settings->yaCert = '';
+        
+        // Выбираем генератор
+        $generator = new \YandexPayout\Generators\ClientOrderEloquent(new \App\Models\Reward\MoneyReward\Drivers\YandexPayout());
+
+        $phone = new \YandexPayout\Accounts\Phone($settings, $generator);
+        $phone->setDstAccount('79052075556'); // передаем номер строго так
+        $phone->setAmount(1);// сумма - ожидает float
+        $phone->setContract('Тестовый платеж');
+        
+        // Далее несколько стратегий отправки
+        $phone->canSend(); // разовый запрос можно ли отправить деньги
+        $phone->send(); // сразу попытаться отправить или после информации 
+//        от метода выше
+        $phone->sendIncrementId(); // будут произвоидится попытки начисления 
+//        денег - с последующей генерации следующего clientOrderId, пока 
+//        никакаих ограничений нет - будет до победного
+
+        $phone->getReport(); // получение отчета о запросе - где данные об 
+//        ответе сервиса и данные из запроса, для получения данных - 
+//        предоставлены get методы
+//        Примерная структура такая
+        YandexPayout\ReportOfRequest {#1637 ▼
+          -clientOrderId: "1"
+          -amount: 1.0
+          -dstAccount: "79052075556"
+          -contract: "Тестовый платеж"
+          -agentId: "201111"
+          -currency: 643
+          -response: YandexPayout\Response\Response {#1652 ▼ // Объект 
+//          response можно получить через метод $phone->getReport()->response()
+            -balance: "200.36"
+            -processedDT: "2021-10-20T21:29:50.747+03:00"
+            -identification: "reviewed"
+            -techMessage: null
+            -status: "0"
+            -error: null
+          }
+        }
+        
+```
+
+<a name="yandex-purse"></a>
+
+## Начисление на яндекс кошелек
+
+✅ Проверка возможности осуществлении
+платежа [(testDeposition)](https://yookassa.ru/docs/payouts/api/make-deposition/basics#test-deposition)
+
+```php
+        // Передаем настройки
+        $settings = new Settings();
+        $settings->agentId = '';
+        $settings->cert = '';
+        $settings->certPassword = '';
+        $settings->privateKey = '';
+        $settings->yaCert = '';
+        
+        // Выбираем генератор
+        $generator = new \YandexPayout\Generators\ClientOrderUuid();
+
+        $phone = new \YandexPayout\Accounts\YandexPurse($settings, $generator);
+        $phone->setDstAccount('4100116075156746'); // передаем номер строго так
+        $phone->setAmount(1);// сумма - ожидает float
+        $phone->setContract('Тестовый платеж');
+        
+        // Далее несколько стратегий отправки
+        $phone->canSend(); // разовый запрос можно ли отправить деньги
+        $phone->send(); // сразу попытаться отправить или после информации 
+//        от метода выше
+        $phone->sendIncrementId(); // будут произвоидится попытки начисления 
+//        денег - с последующей генерации следующего clientOrderId, пока 
+//        никакаих ограничений нет - будет до победного
+
+        $phone->getReport(); // получение отчета о запросе - где данные об 
+//        ответе сервиса и данные из запроса, для получения данных - 
+//        предоставлены get методы
+//        Примерная структура такая
+        YandexPayout\ReportOfRequest {#1637 ▼
+          -clientOrderId: "1"
+          -amount: 1.0
+          -dstAccount: "4100116075156746"
+          -contract: "Тестовый платеж"
+          -agentId: "201111"
+          -currency: 643
+          -response: YandexPayout\Response\Response {#1652 ▼ // Объект 
+//          response можно получить через метод $phone->getReport()->response()
+            -balance: "200.36"
+            -processedDT: "2021-10-20T21:29:50.747+03:00"
+            -identification: "reviewed"
+            -techMessage: null
+            -status: "0"
+            -error: null
+          }
+        }
+        
+```
+
+<a name="laravel"></a>
+
+## Интеграция с Laravel
+
+Пакет имеет некоторое упрощении в использовании - через контейнер laravel
+
+Скопируем файл конфигурации в папку config
+
+```shell
+php artisan vendor:publish --tag= yandex-payouts`
+```
+
+Далее надо передать все настройки и выбрать генератор по-умолчанию
+
+```php
+    'cardSynonimUrl' => '',
+    'agentId'        => env('YANDEX_MONEY_PAYOUT_AGENT_ID', ''),
+    'certPassword'   => env('YANDEX_MONEY_PAYOUT_CERT_PASSWORD', ''),
+    'cert' => env('YANDEX_MONEY_PAYOUT_CERT', ''),
+     // абсолютный путь 200000.pem
+    'privateKey' => env('YANDEX_MONEY_PAYOUT_CERT_PRIVATE', ''),
+    // абсолютный путь private.pem
+    'yaCert' => env('YANDEX_MONEY_PAYOUT_CERT_REQUEST', ''), 
+    // абсолютный путь request.cer
+
+    'generator' => [
+        'type' => \YandexPayout\Generators\ClientOrderEloquent::class,
+        'model' => \App\Models\YandexPayout::class
+    ]
+```
+
+Далее использование - сводится к получению объектов из контейнера. Вы можете
+получать эти объекты в других местах(контроллеры, очереди) - везде где есть авто
+resolve
+
+```php
+  $phone = new \YandexPayout\Accounts\YandexPurse(app(Settings::class), app(GeneratorClientOrderId::class));
+  $phone->setDstAccount('4100116075156746');
+  $phone->setAmount(1);
+  $phone->setContract('Тестовый платеж');
+  dd($phone->sendIncrementId(), $phone->getReport());
+```
+
+<a name="extra"></a>
+
+## Дополнительный материалы
+
+* Документация яндекса [здесь](https://yookassa.ru/docs/payouts)
+
+<a name="donate"></a>
+
+## Угостить чаем или кофем 😌
+
+Этот пакет был создан с целью экономии времени для коллег разработчиков. Если он
+вам помог сэкономить время - то я буду рад вашей поддержки в виде звезды или
+скромного доната.
+
+Этот простой знак внимания - даст мне понять - что труды не напрасны.
+
+https://money.yandex.ru/to/410019109036855
